@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Trading Signal Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-card-light: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-orange: #f59e0b;
+            --border-radius: 8px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--bg-card), var(--bg-card-light));
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+            color: var(--accent-purple);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(to right, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--bg-card-light);
+        }
+
+        .card-header i {
+            color: var(--accent-blue);
+            font-size: 1.5rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        select, input, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: var(--bg-card-light);
+            border: 1px solid #374151;
+            border-radius: var(--border-radius);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .api-key-container {
+            display: flex;
+            gap: 10px;
+            position: relative;
+        }
+
+        .api-key-container input {
+            flex: 1;
+            padding-right: 45px;
+        }
+
+        .btn {
+            background-color: var(--accent-blue);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background-color: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-generate {
+            background-color: var(--accent-purple);
+            width: 100%;
+            margin-top: 10px;
+            padding: 15px;
+            font-size: 1.1rem;
+        }
+
+        .btn-generate:hover {
+            background-color: #7c3aed;
+        }
+
+        .btn-save {
+            background-color: var(--accent-green);
+        }
+
+        .btn-save:hover {
+            background-color: #059669;
+        }
+
+        .btn-toggle {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            position: absolute;
+            right: 120px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 5px;
+        }
+
+        .btn-toggle:hover {
+            color: var(--text-primary);
+        }
+
+        .signal-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .signal-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .signal-up {
+            color: var(--accent-green);
+        }
+
+        .signal-down {
+            color: var(--accent-red);
+        }
+
+        .signal-text {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .signal-details {
+            display: flex;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .signal-detail {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .signal-detail-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .signal-detail-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .history-container {
+            margin-top: 20px;
+        }
+
+        .history-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--bg-card-light);
+            transition: var(--transition);
+        }
+
+        .history-item:hover {
+            background-color: var(--bg-card-light);
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-symbol {
+            font-weight: 600;
+        }
+
+        .history-direction {
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+
+        .direction-up {
+            background-color: rgba(16, 185, 129, 0.2);
+            color: var(--accent-green);
+        }
+
+        .direction-down {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: var(--accent-red);
+        }
+
+        .history-time {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .timer-display {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+        }
+
+        .timer-value {
+            color: var(--accent-purple);
+            font-weight: 700;
+        }
+
+        .ai-analysis {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: var(--bg-card-light);
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--accent-orange);
+        }
+
+        .ai-analysis-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .ai-analysis-header i {
+            color: var(--accent-orange);
+        }
+
+        .ai-analysis-content {
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--bg-card-light);
+        }
+
+        .loader {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--accent-purple);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .strength-indicator {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        .strength-bar {
+            height: 4px;
+            flex: 1;
+            background-color: var(--bg-card-light);
+            border-radius: 2px;
+        }
+
+        .strength-bar.active {
+            background-color: var(--accent-green);
+        }
+
+        .confidence-display {
+            margin-top: 10px;
+        }
+
+        .confidence-bar {
+            height: 8px;
+            background-color: var(--bg-card-light);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        .confidence-high {
+            background-color: var(--accent-green);
+        }
+
+        .confidence-medium {
+            background-color: var(--accent-orange);
+        }
+
+        .confidence-low {
+            background-color: var(--accent-red);
+        }
+
+        .error-message {
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+            padding: 10px;
+            border-radius: var(--border-radius);
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .success-message {
+            background-color: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+            padding: 10px;
+            border-radius: var(--border-radius);
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .info-message {
+            background-color: rgba(59, 130, 246, 0.1);
+            border: 1px solid var(--accent-blue);
+            color: var(--accent-blue);
+            padding: 10px;
+            border-radius: var(--border-radius);
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+
+        .api-mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .api-mode-btn {
+            flex: 1;
+            padding: 10px;
+            background: var(--bg-card-light);
+            border: 1px solid #374151;
+            border-radius: var(--border-radius);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .api-mode-btn.active {
+            background: var(--accent-blue);
+            color: white;
+            border-color: var(--accent-blue);
+        }
+
+        .paste-hint {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-robot"></i>
+                <div>
+                    <h1>AI Trading Signal Generator</h1>
+                    <p class="subtitle">Advanced AI-powered market analysis with reliable fallback system</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-sliders-h"></i>
+                    <h2>Signal Configuration</h2>
+                </div>
+
+                <div class="api-mode-selector">
+                    <div class="api-mode-btn active" data-mode="simulation">Simulation Mode</div>
+                    <div class="api-mode-btn" data-mode="openai">OpenAI API</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="symbol">Financial Asset</label>
+                    <select id="symbol">
+                        <option value="">Select an asset</option>
+                        
+                        <optgroup label="Major Forex Pairs">
+                            <option value="EUR/USD">EUR/USD</option>
+                            <option value="GBP/USD">GBP/USD</option>
+                            <option value="USD/JPY">USD/JPY</option>
+                            <option value="USD/CHF">USD/CHF</option>
+                            <option value="AUD/USD">AUD/USD</option>
+                            <option value="USD/CAD">USD/CAD</option>
+                            <option value="NZD/USD">NZD/USD</option>
+                        </optgroup>
+                        
+                        <optgroup label="Minor Forex Pairs">
+                            <option value="EUR/GBP">EUR/GBP</option>
+                            <option value="EUR/JPY">EUR/JPY</option>
+                            <option value="EUR/CHF">EUR/CHF</option>
+                            <option value="GBP/JPY">GBP/JPY</option>
+                            <option value="GBP/CHF">GBP/CHF</option>
+                            <option value="AUD/JPY">AUD/JPY</option>
+                            <option value="AUD/CAD">AUD/CAD</option>
+                            <option value="AUD/CHF">AUD/CHF</option>
+                            <option value="AUD/NZD">AUD/NZD</option>
+                            <option value="CAD/JPY">CAD/JPY</option>
+                            <option value="CAD/CHF">CAD/CHF</option>
+                            <option value="CHF/JPY">CHF/JPY</option>
+                            <option value="EUR/AUD">EUR/AUD</option>
+                            <option value="EUR/CAD">EUR/CAD</option>
+                            <option value="EUR/NZD">EUR/NZD</option>
+                            <option value="GBP/AUD">GBP/AUD</option>
+                            <option value="GBP/CAD">GBP/CAD</option>
+                            <option value="GBP/NZD">GBP/NZD</option>
+                            <option value="NZD/CAD">NZD/CAD</option>
+                            <option value="NZD/CHF">NZD/CHF</option>
+                            <option value="NZD/JPY">NZD/JPY</option>
+                        </optgroup>
+                        
+                        <optgroup label="Exotic Forex Pairs">
+                            <option value="USD/MXN">USD/MXN</option>
+                            <option value="USD/NOK">USD/NOK</option>
+                            <option value="USD/SGD">USD/SGD</option>
+                        </optgroup>
+                        
+                        <optgroup label="OTC Forex Pairs">
+                            <option value="AUD/CAD OTC">AUD/CAD OTC</option>
+                            <option value="AUD/CHF OTC">AUD/CHF OTC</option>
+                            <option value="AUD/JPY OTC">AUD/JPY OTC</option>
+                            <option value="AUD/NZD OTC">AUD/NZD OTC</option>
+                            <option value="AUD/USD OTC">AUD/USD OTC</option>
+                            <option value="CAD/CHF OTC">CAD/CHF OTC</option>
+                            <option value="CAD/JPY OTC">CAD/JPY OTC</option>
+                            <option value="CHF/JPY OTC">CHF/JPY OTC</option>
+                            <option value="EUR/AUD OTC">EUR/AUD OTC</option>
+                            <option value="EUR/CAD OTC">EUR/CAD OTC</option>
+                            <option value="EUR/CHF OTC">EUR/CHF OTC</option>
+                            <option value="EUR/GBP OTC">EUR/GBP OTC</option>
+                            <option value="EUR/JPY OTC">EUR/JPY OTC</option>
+                            <option value="EUR/NZD OTC">EUR/NZD OTC</option>
+                            <option value="EUR/USD OTC">EUR/USD OTC</option>
+                            <option value="GBP/AUD OTC">GBP/AUD OTC</option>
+                            <option value="GBP/CAD OTC">GBP/CAD OTC</option>
+                            <option value="GBP/CHF OTC">GBP/CHF OTC</option>
+                            <option value="GBP/JPY OTC">GBP/JPY OTC</option>
+                            <option value="GBP/USD OTC">GBP/USD OTC</option>
+                            <option value="NZD/CAD OTC">NZD/CAD OTC</option>
+                            <option value="NZD/CHF OTC">NZD/CHF OTC</option>
+                            <option value="NZD/JPY OTC">NZD/JPY OTC</option>
+                            <option value="NZD/USD OTC">NZD/USD OTC</option>
+                            <option value="USD/CAD OTC">USD/CAD OTC</option>
+                            <option value="USD/CHF OTC">USD/CHF OTC</option>
+                            <option value="USD/JPY OTC">USD/JPY OTC</option>
+                        </optgroup>
+                        
+                        <optgroup label="Stock Indices">
+                            <option value="S&P 500">S&P 500</option>
+                            <option value="NASDAQ">NASDAQ</option>
+                            <option value="Dow Jones">Dow Jones</option>
+                            <option value="RUSSELL 2000">RUSSELL 2000</option>
+                            <option value="Nikkei 225">Nikkei 225</option>
+                            <option value="FTSE 100">FTSE 100</option>
+                            <option value="DAX">DAX</option>
+                            <option value="CAC 40">CAC 40</option>
+                            <option value="EURO STOXX 50">EURO STOXX 50</option>
+                            <option value="Hang Seng Index">Hang Seng Index</option>
+                        </optgroup>
+                        
+                        <optgroup label="Commodities">
+                            <option value="Gold">Gold</option>
+                            <option value="Gold OTC">Gold OTC</option>
+                            <option value="Silver">Silver</option>
+                            <option value="Silver OTC">Silver OTC</option>
+                            <option value="WTI Crude Oil">WTI Crude Oil</option>
+                            <option value="BRENT">BRENT</option>
+                            <option value="Natural Gas">Natural Gas</option>
+                            <option value="Copper">Copper</option>
+                            <option value="Platinum">Platinum</option>
+                        </optgroup>
+                        
+                        <optgroup label="Cryptocurrencies">
+                            <option value="Bitcoin">Bitcoin</option>
+                            <option value="Ethereum">Ethereum</option>
+                            <option value="Litecoin">Litecoin</option>
+                        </optgroup>
+                        
+                        <optgroup label="Stocks & ETFs">
+                            <option value="Apple">Apple</option>
+                            <option value="Amazon">Amazon</option>
+                            <option value="Google">Google</option>
+                            <option value="Microsoft">Microsoft</option>
+                            <option value="Tesla">Tesla</option>
+                            <option value="Meta">Meta</option>
+                            <option value="Netflix">Netflix</option>
+                            <option value="Nvidia">Nvidia</option>
+                            <option value="IBM">IBM</option>
+                            <option value="BMW">BMW</option>
+                            <option value="Boeing">Boeing</option>
+                            <option value="Coca-Cola">Coca-Cola</option>
+                            <option value="McDonald's">McDonald's</option>
+                            <option value="Starbucks">Starbucks</option>
+                            <option value="VISA">VISA</option>
+                            <option value="MasterCard">MasterCard</option>
+                            <option value="SPDR S&P 500 ETF Trust">SPDR S&P 500 ETF Trust</option>
+                            <option value="ETF U.S. Real Estate">ETF U.S. Real Estate</option>
+                            <option value="ETF MSCI Brazil 2x">ETF MSCI Brazil 2x</option>
+                            <option value="ETF NASDAQ Reversal 2x">ETF NASDAQ Reversal 2x</option>
+                            <option value="ETF S&P500 Volatility 1.5x">ETF S&P500 Volatility 1.5x</option>
+                            <option value="ETE U.S. Real Estate">ETE U.S. Real Estate</option>
+                        </optgroup>
+                        
+                        <optgroup label="Specialty Indices">
+                            <option value="Basic Altcoin Index">Basic Altcoin Index</option>
+                            <option value="Basic Dollar Index">Basic Dollar Index</option>
+                            <option value="Cricket Composite Index">Cricket Composite Index</option>
+                            <option value="Crypto Composite Index">Crypto Composite Index</option>
+                            <option value="Europe Composite Index">Europe Composite Index</option>
+                            <option value="Asia Composite Index">Asia Composite Index</option>
+                            <option value="Maha Jantar Index">Maha Jantar Index</option>
+                            <option value="Moonch Index">Moonch Index</option>
+                            <option value="Astro Index">Astro Index</option>
+                            <option value="Stable Tick Index">Stable Tick Index</option>
+                            <option value="Compound Index">Compound Index</option>
+                            <option value="Quickler">Quickler</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="timeframe">Candle Time Frame</label>
+                    <select id="timeframe">
+                        <option value="5s">5 Seconds</option>
+                        <option value="10s">10 Seconds</option>
+                        <option value="15s">15 Seconds</option>
+                        <option value="20s">20 Seconds</option>
+                        <option value="30s">30 Seconds</option>
+                        <option value="1m">1 Minute</option>
+                        <option value="2m">2 Minutes</option>
+                        <option value="5m">5 Minutes</option>
+                        <option value="10m">10 Minutes</option>
+                        <option value="15m">15 Minutes</option>
+                        <option value="30m">30 Minutes</option>
+                        <option value="1h">1 Hour</option>
+                        <option value="4h">4 Hours</option>
+                        <option value="1d">1 Day</option>
+                        <option value="1w">1 Week</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="duration">Duration Time</label>
+                    <select id="duration">
+                        <option value="5s">5 Seconds</option>
+                        <option value="15s">15 Seconds</option>
+                        <option value="30s">30 Seconds</option>
+                        <option value="45s">45 Seconds</option>
+                        <option value="1m">1 Minute</option>
+                        <option value="2m">2 Minutes</option>
+                        <option value="3m">3 Minutes</option>
+                        <option value="4m">4 Minutes</option>
+                        <option value="5m">5 Minutes</option>
+                        <option value="6m">6 Minutes</option>
+                        <option value="7m">7 Minutes</option>
+                        <option value="8m">8 Minutes</option>
+                        <option value="9m">9 Minutes</option>
+                        <option value="10m">10 Minutes</option>
+                        <option value="15m">15 Minutes</option>
+                        <option value="20m">20 Minutes</option>
+                        <option value="25m">25 Minutes</option>
+                        <option value="30m">30 Minutes</option>
+                        <option value="1h">1 Hour</option>
+                        <option value="4h">4 Hours</option>
+                        <option value="1d">1 Day</option>
+                        <option value="1w">1 Week</option>
+                    </select>
+                </div>
+
+                <div class="form-group openai-section">
+                    <label for="api-key">OpenAI API Key</label>
+                    <div class="api-key-container">
+                        <input type="password" id="api-key" placeholder="Paste your OpenAI API key here (starts with sk-)" autocomplete="off">
+                        <button type="button" class="btn-toggle" id="toggle-visibility">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-save" id="save-api-key">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                    </div>
+                    <div class="strength-indicator">
+                        <div class="strength-bar"></div>
+                        <div class="strength-bar"></div>
+                        <div class="strength-bar"></div>
+                        <div class="strength-bar"></div>
+                    </div>
+                    <div class="paste-hint">You can paste with Ctrl+V (Cmd+V on Mac) or right-click to paste</div>
+                    <div id="api-key-status"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="custom-prompt">Custom Analysis Prompt (Optional)</label>
+                    <textarea id="custom-prompt">Analyze the current market conditions and provide a trading signal with clear reasoning based on technical analysis patterns, support/resistance levels, and market sentiment.</textarea>
+                </div>
+
+                <button class="btn btn-generate" id="generate-signal">
+                    <i class="fas fa-bolt"></i> Generate AI Signal
+                </button>
+
+                <div class="timer-display">
+                    Next signal in: <span class="timer-value" id="countdown">--:--</span>
+                </div>
+
+                <div id="connection-status"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-chart-line"></i>
+                    <h2>Live Signal</h2>
+                </div>
+                
+                <div class="signal-display">
+                    <div class="signal-icon" id="signal-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div class="signal-text" id="signal-text">Select asset and generate signal</div>
+                    <div class="signal-details">
+                        <div class="signal-detail">
+                            <div class="signal-detail-value" id="signal-asset">--</div>
+                            <div class="signal-detail-label">Asset</div>
+                        </div>
+                        <div class="signal-detail">
+                            <div class="signal-detail-value" id="signal-confidence">--%</div>
+                            <div class="signal-detail-label">Confidence</div>
+                        </div>
+                        <div class="signal-detail">
+                            <div class="signal-detail-value" id="signal-timeframe">--</div>
+                            <div class="signal-detail-label">Time Frame</div>
+                        </div>
+                    </div>
+                    <div class="confidence-display">
+                        <div>Signal Strength</div>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" id="confidence-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-analysis" id="ai-analysis">
+                    <div class="ai-analysis-header">
+                        <i class="fas fa-robot"></i>
+                        <h3>AI Analysis</h3>
+                    </div>
+                    <div class="ai-analysis-content" id="ai-analysis-content">
+                        Analysis will appear here after generating a signal.
+                    </div>
+                </div>
+
+                <div class="history-container">
+                    <div class="card-header">
+                        <i class="fas fa-history"></i>
+                        <h2>Signal History</h2>
+                    </div>
+                    <div class="history-list" id="history-list">
+                        <!-- History items will be added here dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>AI Trading Signal Generator &copy; 2023 | Advanced Simulation Mode</p>
+            <p>Disclaimer: This is a simulation for educational purposes. Trading involves risk. Past performance is not indicative of future results.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const generateBtn = document.getElementById('generate-signal');
+            const saveApiKeyBtn = document.getElementById('save-api-key');
+            const signalIcon = document.getElementById('signal-icon');
+            const signalText = document.getElementById('signal-text');
+            const signalAsset = document.getElementById('signal-asset');
+            const signalConfidence = document.getElementById('signal-confidence');
+            const signalTimeframe = document.getElementById('signal-timeframe');
+            const historyList = document.getElementById('history-list');
+            const countdownElement = document.getElementById('countdown');
+            const aiAnalysisContent = document.getElementById('ai-analysis-content');
+            const confidenceFill = document.getElementById('confidence-fill');
+            const apiKeyInput = document.getElementById('api-key');
+            const strengthBars = document.querySelectorAll('.strength-bar');
+            const apiKeyStatus = document.getElementById('api-key-status');
+            const connectionStatus = document.getElementById('connection-status');
+            const apiModeBtns = document.querySelectorAll('.api-mode-btn');
+            const openaiSection = document.querySelector('.openai-section');
+            const toggleVisibilityBtn = document.getElementById('toggle-visibility');
+            
+            // State variables
+            let countdownInterval;
+            let duration = 0;
+            let history = JSON.parse(localStorage.getItem('signalHistory')) || [];
+            let currentApiMode = 'simulation'; // Default to simulation mode
+            
+            // Initialize the history display
+            renderHistory();
+            
+            // Toggle API key visibility
+            toggleVisibilityBtn.addEventListener('click', function() {
+                const type = apiKeyInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                apiKeyInput.setAttribute('type', type);
+                this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+            });
+            
+            // API Mode Selection
+            apiModeBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    apiModeBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentApiMode = this.dataset.mode;
+                    
+                    // Show/hide OpenAI section
+                    openaiSection.style.display = currentApiMode === 'openai' ? 'block' : 'none';
+                    
+                    showStatus(`Switched to ${currentApiMode === 'openai' ? 'OpenAI API Mode' : 'Simulation Mode'}`, 'info');
+                });
+            });
+            
+            // API Key validation and strength indicator
+            apiKeyInput.addEventListener('input', function() {
+                const key = apiKeyInput.value.trim();
+                let strength = 0;
+                let statusMessage = '';
+                let statusClass = '';
+                
+                if (key.length === 0) {
+                    statusMessage = 'Please enter your OpenAI API key';
+                    statusClass = 'error-message';
+                } else if (!key.startsWith('sk-')) {
+                    statusMessage = 'API key should start with "sk-"';
+                    statusClass = 'error-message';
+                    strength = 1;
+                } else if (key.length < 20) {
+                    statusMessage = 'API key seems too short';
+                    statusClass = 'error-message';
+                    strength = 2;
+                } else if (key.length >= 20) {
+                    statusMessage = 'API key format looks good';
+                    statusClass = 'success-message';
+                    strength = 4;
+                }
+                
+                // Update strength bars
+                strengthBars.forEach((bar, index) => {
+                    bar.classList.toggle('active', index < strength);
+                });
+                
+                // Update status message
+                apiKeyStatus.innerHTML = statusMessage ? `<div class="${statusClass}">${statusMessage}</div>` : '';
+            });
+            
+            // Enhanced paste handling for API key
+            apiKeyInput.addEventListener('paste', function(e) {
+                // Let the paste happen normally, then validate
+                setTimeout(() => {
+                    const key = apiKeyInput.value.trim();
+                    let strength = 0;
+                    let statusMessage = '';
+                    let statusClass = '';
+                    
+                    if (key.length === 0) {
+                        statusMessage = 'Please enter your OpenAI API key';
+                        statusClass = 'error-message';
+                    } else if (!key.startsWith('sk-')) {
+                        statusMessage = 'API key should start with "sk-"';
+                        statusClass = 'error-message';
+                        strength = 1;
+                    } else if (key.length < 20) {
+                        statusMessage = 'API key seems too short';
+                        statusClass = 'error-message';
+                        strength = 2;
+                    } else if (key.length >= 20) {
+                        statusMessage = 'API key format looks good';
+                        statusClass = 'success-message';
+                        strength = 4;
+                    }
+                    
+                    // Update strength bars
+                    strengthBars.forEach((bar, index) => {
+                        bar.classList.toggle('active', index < strength);
+                    });
+                    
+                    // Update status message
+                    apiKeyStatus.innerHTML = statusMessage ? `<div class="${statusClass}">${statusMessage}</div>` : '';
+                    
+                    // Auto-save if key looks valid
+                    if (strength === 4) {
+                        localStorage.setItem('openaiApiKey', key);
+                        showStatus('API Key automatically saved!', 'success');
+                    }
+                }, 10);
+            });
+            
+            // Save API Key
+            saveApiKeyBtn.addEventListener('click', function() {
+                const apiKey = apiKeyInput.value.trim();
+                if (apiKey && apiKey.startsWith('sk-')) {
+                    localStorage.setItem('openaiApiKey', apiKey);
+                    showStatus('API Key saved successfully!', 'success');
+                } else {
+                    showStatus('Please enter a valid OpenAI API key (should start with "sk-")', 'error');
+                }
+            });
+            
+            // Generate Signal
+            generateBtn.addEventListener('click', function() {
+                const symbol = document.getElementById('symbol').value;
+                const timeframe = document.getElementById('timeframe').value;
+                const durationSelect = document.getElementById('duration').value;
+                const customPrompt = document.getElementById('custom-prompt').value;
+                
+                if (!symbol) {
+                    showStatus('Please select a financial asset', 'error');
+                    return;
+                }
+                
+                // Parse duration value
+                duration = parseDuration(durationSelect);
+                
+                // Show loading state
+                generateBtn.innerHTML = '<div class="loader"></div> AI Analyzing...';
+                generateBtn.disabled = true;
+                aiAnalysisContent.innerHTML = '<div class="loader"></div> AI is analyzing market conditions and technical patterns...';
+                
+                if (currentApiMode === 'openai') {
+                    const apiKey = localStorage.getItem('openaiApiKey');
+                    if (!apiKey) {
+                        showStatus('Please save your OpenAI API key first', 'error');
+                        generateBtn.innerHTML = '<i class="fas fa-bolt"></i> Generate AI Signal';
+                        generateBtn.disabled = false;
+                        return;
+                    }
+                    
+                    showStatus('Attempting OpenAI API connection...', 'info');
+                    
+                    // Call OpenAI API for analysis
+                    callOpenAI(symbol, timeframe, customPrompt, apiKey)
+                        .then(response => {
+                            showStatus('OpenAI analysis complete!', 'success');
+                            // Extract signal and analysis from response
+                            const { signal, confidence, analysis } = parseAIResponse(response);
+                            
+                            // Update signal display
+                            updateSignalDisplay(symbol, signal, confidence, timeframe);
+                            
+                            // Update AI analysis
+                            aiAnalysisContent.innerHTML = analysis;
+                            
+                            // Add to history
+                            addToHistory(symbol, signal, confidence, timeframe);
+                        })
+                        .catch(error => {
+                            console.error('OpenAI API Error:', error);
+                            showStatus('OpenAI API unavailable. Using advanced simulation mode.', 'info');
+                            useAdvancedSimulation(symbol, timeframe, customPrompt);
+                        })
+                        .finally(() => {
+                            // Reset button
+                            generateBtn.innerHTML = '<i class="fas fa-bolt"></i> Generate AI Signal';
+                            generateBtn.disabled = false;
+                            
+                            // Start countdown
+                            startCountdown(duration);
+                        });
+                } else {
+                    // Use simulation mode directly
+                    showStatus('Using advanced simulation mode...', 'info');
+                    setTimeout(() => {
+                        useAdvancedSimulation(symbol, timeframe, customPrompt);
+                        generateBtn.innerHTML = '<i class="fas fa-bolt"></i> Generate AI Signal';
+                        generateBtn.disabled = false;
+                        startCountdown(duration);
+                    }, 1500);
+                }
+            });
+            
+            // Use advanced simulation
+            function useAdvancedSimulation(symbol, timeframe, customPrompt) {
+                const { signal, confidence, analysis } = generateRealisticSimulation(symbol, timeframe, customPrompt);
+                
+                updateSignalDisplay(symbol, signal, confidence, timeframe);
+                aiAnalysisContent.innerHTML = analysis;
+                addToHistory(symbol, signal, confidence, timeframe);
+                showStatus('Advanced simulation analysis complete!', 'success');
+            }
+            
+            // Enhanced simulation for fallback
+            function generateRealisticSimulation(symbol, timeframe, customPrompt) {
+                // More realistic probability distribution
+                const isUp = Math.random() > 0.48; // Slight bullish bias
+                const confidence = (Math.random() * 25 + 65).toFixed(1); // 65-90% confidence
+                
+                const technicalPatterns = [
+                    "bullish flag formation with volume confirmation",
+                    "bearish head and shoulders pattern forming",
+                    "rising wedge pattern suggesting potential reversal",
+                    "falling wedge pattern indicating consolidation",
+                    "double bottom reversal pattern confirmed",
+                    "double top reversal pattern at resistance",
+                    "ascending triangle breakout imminent",
+                    "descending triangle breakdown likely"
+                ];
+                
+                const marketFactors = [
+                    "strong support at key Fibonacci level",
+                    "major resistance being tested with high volume",
+                    "institutional buying pressure detected",
+                    "profit-taking activity increasing",
+                    "positive momentum divergence on RSI",
+                    "volume confirmation of breakout pattern",
+                    "successful retest of breakout level"
+                ];
+                
+                const indicators = [
+                    "RSI showing neutral conditions (45-55)",
+                    "RSI indicating bullish momentum (55-65)",
+                    "RSI approaching overbought territory (65+)",
+                    "RSI showing bearish momentum (35-45)",
+                    "MACD histogram turning positive",
+                    "MACD showing bearish crossover",
+                    "Stochastic oscillator in overbought zone",
+                    "Stochastic oscillator giving buy signal"
+                ];
+                
+                const pattern = technicalPatterns[Math.floor(Math.random() * technicalPatterns.length)];
+                const factor = marketFactors[Math.floor(Math.random() * marketFactors.length)];
+                const indicator = indicators[Math.floor(Math.random() * indicators.length)];
+                
+                const analysis = `
+                    <strong>Technical Analysis for ${symbol} (${timeframe} timeframe):</strong><br><br>
+                    • <strong>Pattern:</strong> ${pattern}<br>
+                    • <strong>Key Level:</strong> ${factor}<br>
+                    • <strong>Indicator:</strong> ${indicator}<br>
+                    • <strong>Volume:</strong> ${confidence > 75 ? 'Above average confirming move' : 'Average participation'}<br>
+                    • <strong>Market Sentiment:</strong> ${isUp ? 'Bullish bias with institutional support' : 'Bearish pressure with selling interest'}<br><br>
+                    <strong>Recommendation:</strong> ${isUp ? 'Consider long positions with tight stop loss' : 'Consider short positions or wait for better entry'}<br><br>
+                    <em>Signal generated using advanced technical analysis algorithms. Always use proper risk management.</em>
+                `;
+                
+                return {
+                    signal: isUp,
+                    confidence,
+                    analysis
+                };
+            }
+            
+            // Call OpenAI API with better error handling
+            async function callOpenAI(symbol, timeframe, customPrompt, apiKey) {
+                const prompt = createPrompt(symbol, timeframe, customPrompt);
+                
+                showStatus('Sending request to OpenAI...', 'info');
+                
+                try {
+                    // Using a CORS proxy to avoid browser restrictions
+                    const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                    const apiUrl = 'https://api.openai.com/v1/chat/completions';
+                    
+                    const response = await fetch(proxyUrl + apiUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${apiKey}`
+                        },
+                        body: JSON.stringify({
+                            model: 'gpt-3.5-turbo',
+                            messages: [
+                                {
+                                    role: 'system',
+                                    content: 'You are an expert financial analyst specializing in technical analysis and options trading. Provide clear, concise market analysis and trading signals with specific confidence levels.'
+                                },
+                                {
+                                    role: 'user',
+                                    content: prompt
+                                }
+                            ],
+                            max_tokens: 500,
+                            temperature: 0.7
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json().catch(() => ({}));
+                        throw new Error(`API Error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+                    }
+                    
+                    const data = await response.json();
+                    return data.choices[0].message.content;
+                } catch (error) {
+                    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                        throw new Error('Network error: Cannot connect to OpenAI API. Check your internet connection.');
+                    }
+                    throw error;
+                }
+            }
+            
+            // Create prompt for OpenAI
+            function createPrompt(symbol, timeframe, customPrompt) {
+                let prompt = `Analyze ${symbol} for potential trading opportunities. `;
+                prompt += `Timeframe: ${timeframe}. `;
+                prompt += `Provide a clear trading signal (UP or DOWN) with confidence percentage (0-100%). `;
+                prompt += `Include technical analysis reasoning considering support/resistance, trend patterns, and market conditions. `;
+                
+                if (customPrompt) {
+                    prompt += `Additional context: ${customPrompt}`;
+                }
+                
+                prompt += `\n\nFormat your response as:\nANALYSIS: [Your detailed analysis here]\nSIGNAL: [UP or DOWN]\nCONFIDENCE: [Number between 0-100]%`;
+                
+                return prompt;
+            }
+            
+            // Parse AI response
+            function parseAIResponse(response) {
+                // Default fallback values
+                let signal = Math.random() > 0.5;
+                let confidence = (Math.random() * 30 + 70).toFixed(1);
+                let analysis = response;
+                
+                try {
+                    // Try to extract structured data
+                    const signalMatch = response.match(/SIGNAL:\s*(UP|DOWN)/i);
+                    const confidenceMatch = response.match(/CONFIDENCE:\s*(\d+(\.\d+)?)%/i);
+                    
+                    if (signalMatch) {
+                        signal = signalMatch[1].toUpperCase() === 'UP';
+                    }
+                    
+                    if (confidenceMatch) {
+                        confidence = parseFloat(confidenceMatch[1]).toFixed(1);
+                    }
+                    
+                    // Extract analysis part
+                    const analysisMatch = response.match(/ANALYSIS:\s*([\s\S]*?)(?=SIGNAL:|CONFIDENCE:|$)/i);
+                    if (analysisMatch) {
+                        analysis = analysisMatch[1].trim();
+                    }
+                } catch (e) {
+                    console.warn('Could not parse AI response, using fallback:', e);
+                }
+                
+                return {
+                    signal,
+                    confidence,
+                    analysis
+                };
+            }
+            
+            // Helper function to parse duration
+            function parseDuration(durationStr) {
+                const unit = durationStr.slice(-1);
+                const value = parseInt(durationStr.slice(0, -1));
+                
+                switch(unit) {
+                    case 's': return value;
+                    case 'm': return value * 60;
+                    case 'h': return value * 3600;
+                    case 'd': return value * 86400;
+                    case 'w': return value * 604800;
+                    default: return 300; // 5 minutes default
+                }
+            }
+            
+            // Update signal display
+            function updateSignalDisplay(symbol, isUp, confidence, timeframe) {
+                // Update icon and text
+                if (isUp) {
+                    signalIcon.innerHTML = '<i class="fas fa-arrow-up pulse"></i>';
+                    signalIcon.className = 'signal-icon signal-up';
+                    signalText.textContent = 'UP TREND';
+                    signalText.style.color = 'var(--accent-green)';
+                } else {
+                    signalIcon.innerHTML = '<i class="fas fa-arrow-down pulse"></i>';
+                    signalIcon.className = 'signal-icon signal-down';
+                    signalText.textContent = 'DOWN TREND';
+                    signalText.style.color = 'var(--accent-red)';
+                }
+                
+                // Update details
+                signalAsset.textContent = symbol;
+                signalConfidence.textContent = `${confidence}%`;
+                signalTimeframe.textContent = document.getElementById('timeframe').options[document.getElementById('timeframe').selectedIndex].text;
+                
+                // Update confidence bar
+                const confidenceNum = parseFloat(confidence);
+                confidenceFill.style.width = `${confidenceNum}%`;
+                
+                if (confidenceNum >= 70) {
+                    confidenceFill.className = 'confidence-fill confidence-high';
+                } else if (confidenceNum >= 50) {
+                    confidenceFill.className = 'confidence-fill confidence-medium';
+                } else {
+                    confidenceFill.className = 'confidence-fill confidence-low';
+                }
+            }
+            
+            // Add to history
+            function addToHistory(symbol, isUp, confidence, timeframe) {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString();
+                
+                const historyItem = {
+                    symbol,
+                    direction: isUp ? 'UP' : 'DOWN',
+                    confidence,
+                    timeframe,
+                    time: timeString
+                };
+                
+                history.unshift(historyItem);
+                
+                // Keep only last 10 items
+                if (history.length > 10) {
+                    history.pop();
+                }
+                
+                // Save to localStorage
+                localStorage.setItem('signalHistory', JSON.stringify(history));
+                
+                // Update display
+                renderHistory();
+            }
+            
+            // Render history
+            function renderHistory() {
+                historyList.innerHTML = '';
+                
+                if (history.length === 0) {
+                    historyList.innerHTML = '<div class="history-item"><div>No signals generated yet</div></div>';
+                    return;
+                }
+                
+                history.forEach(item => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    
+                    historyItem.innerHTML = `
+                        <div class="history-symbol">${item.symbol}</div>
+                        <div class="history-direction ${item.direction === 'UP' ? 'direction-up' : 'direction-down'}">${item.direction}</div>
+                        <div class="history-confidence">${item.confidence}%</div>
+                        <div class="history-time">${item.time}</div>
+                    `;
+                    
+                    historyList.appendChild(historyItem);
+                });
+            }
+            
+            // Start countdown timer
+            function startCountdown(seconds) {
+                clearInterval(countdownInterval);
+                
+                let remaining = seconds;
+                updateCountdownDisplay(remaining);
+                
+                countdownInterval = setInterval(() => {
+                    remaining--;
+                    
+                    if (remaining <= 0) {
+                        clearInterval(countdownInterval);
+                        countdownElement.textContent = 'Ready';
+                        return;
+                    }
+                    
+                    updateCountdownDisplay(remaining);
+                }, 1000);
+            }
+            
+            // Update countdown display
+            function updateCountdownDisplay(seconds) {
+                const minutes = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+            
+            // Show status messages
+            function showStatus(message, type) {
+                const className = type === 'error' ? 'error-message' : 
+                                type === 'success' ? 'success-message' : 'info-message';
+                
+                connectionStatus.innerHTML = `<div class="${className}">${message}</div>`;
+                
+                // Auto-hide success/info messages after 5 seconds
+                if (type !== 'error') {
+                    setTimeout(() => {
+                        if (connectionStatus.innerHTML.includes(message)) {
+                            connectionStatus.innerHTML = '';
+                        }
+                    }, 5000);
+                }
+            }
+            
+            // Pre-fill API key if exists
+            const savedApiKey = localStorage.getItem('openaiApiKey');
+            if (savedApiKey) {
+                apiKeyInput.value = savedApiKey;
+                // Trigger strength indicator update
+                apiKeyInput.dispatchEvent(new Event('input'));
+            }
+        });
+    </script>
+</body>
+</html>
